@@ -45,4 +45,22 @@ using Vec3   = XMFLOAT3;
 using Vec4   = XMFLOAT4;
 using Mat4   = XMMATRIX;
 
-void HelloEngine();
+// enum
+enum
+{
+	SWAP_CHAIN_BUFFER_COUNT = 2
+};
+
+// Predeclaration
+class Engine;
+
+// 출력 창(윈도우)의 정보를 담을 구조체
+struct WindowInfo
+{
+	HWND	hwnd;	// 출력 윈도우
+	int32	width;
+	int32	height;
+	bool	windowed;
+};
+
+extern unique_ptr<Engine> GEngine;

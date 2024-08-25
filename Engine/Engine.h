@@ -1,9 +1,8 @@
-#pragma once
+ï»¿#pragma once
 
-class Device;
-class CommandQueue;
-class SwapChain;
-class DescriptorHeap;
+#include "Device.h"
+#include "CommandQueue.h"
+#include "SwapChain.h"
 
 class Engine
 {
@@ -12,16 +11,21 @@ public:
 	void Render();
 
 public:
-	// Command Queue¿¡ ¿äÃ» »çÇ×À» ³Ö´Â ºÎºĞ
+	inline shared_ptr<Device> GetDevice() { return _device; }
+	inline shared_ptr<CommandQueue> GetCommandQueue() { return _cmd_queue; }
+	inline shared_ptr<SwapChain> GetSwapChain() { return _swap_chain; }
+
+public:
+	// Command Queueì— ìš”ì²­ ì‚¬í•­ì„ ë„£ëŠ” ë¶€ë¶„
 	void RenderBegin();
 
-	// Command Queue¿¡ ÀÖ´Â ¿äÃ» »çÇ×À» ²¨³» GPU¿¡ ¿äÃ»ÇÏ´Â ºÎºĞ
+	// Command Queueì— ìˆëŠ” ìš”ì²­ ì‚¬í•­ì„ êº¼ë‚´ GPUì— ìš”ì²­í•˜ëŠ” ë¶€ë¶„
 	void RenderEnd();
 
 	void ResizeWindow( int32 width, int32 height );
 
 private:
-	// ±×·ÁÁú È­¸é °ü·Ã Å¬·¡½º
+	// ê·¸ë ¤ì§ˆ í™”ë©´ ê´€ë ¨ í´ë˜ìŠ¤
 	WindowInfo		_window;
 	D3D12_VIEWPORT	_viewport{};
 	D3D12_RECT		_scissor_rect{};
@@ -29,6 +33,4 @@ private:
 	shared_ptr<Device> _device;
 	shared_ptr<CommandQueue> _cmd_queue;
 	shared_ptr<SwapChain> _swap_chain;
-	shared_ptr<DescriptorHeap> _desc_heap;
 };
-

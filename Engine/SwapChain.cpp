@@ -1,74 +1,50 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "SwapChain.h"
 
 /**
 * Note
-*  - Scanline Ordering: µğ½ºÇÃ·¹ÀÌ¿¡¼­ ·»´õ¸µ ½Ã °¢ ½ºÄµ¶óÀÎ(°¡·ÎÁÙ)ÀÌ ±×·ÁÁö´Â ¼ø¼­
-*    - Progressive Scan (¼øÂ÷ ÁÖ»ç)
-*      - ¸ğµç ½ºÄµ¶óÀÎÀ» ¼ø¤ºÂ÷ÀûÀ¸·Î, Áï, À§¿¡¼­ ¾Æ·¡·Î ¿¬¼ÓÀûÀ¸·Î È­¸éÀ» ±×¸²
-*      - Çö´ë µğ½ºÇÃ·¹ÀÌ(´ëºÎºĞÀÇ LCD¸ğ´ÏÅÍ µî)¿¡¼­ ÀÏ¹İÀûÀ¸·Î »ç¿ëµÊ.
-*      - ÀÌ¹ÌÁö Ç°ÁúÀÌ °í¸£°í ºü¸¥ ¿òÁ÷ÀÓÀ» Ç¥ÇöÇÏ´Âµ¥ À¯¸®
+*  - Scanline Ordering: ë””ìŠ¤í”Œë ˆì´ì—ì„œ ë Œë”ë§ ì‹œ ê° ìŠ¤ìº”ë¼ì¸(ê°€ë¡œì¤„)ì´ ê·¸ë ¤ì§€ëŠ” ìˆœì„œ
+*    - Progressive Scan (ìˆœì°¨ ì£¼ì‚¬)
+*      - ëª¨ë“  ìŠ¤ìº”ë¼ì¸ì„ ìˆœã…Šì°¨ì ìœ¼ë¡œ, ì¦‰, ìœ„ì—ì„œ ì•„ë˜ë¡œ ì—°ì†ì ìœ¼ë¡œ í™”ë©´ì„ ê·¸ë¦¼
+*      - í˜„ëŒ€ ë””ìŠ¤í”Œë ˆì´(ëŒ€ë¶€ë¶„ì˜ LCDëª¨ë‹ˆí„° ë“±)ì—ì„œ ì¼ë°˜ì ìœ¼ë¡œ ì‚¬ìš©ë¨.
+*      - ì´ë¯¸ì§€ í’ˆì§ˆì´ ê³ ë¥´ê³  ë¹ ë¥¸ ì›€ì§ì„ì„ í‘œí˜„í•˜ëŠ”ë° ìœ ë¦¬
 *      -> DXGI_MODE_SCANLINE_ORDER_PROGRESSIVE
-*    - Interlaced Scan (ÀÎÅÍ·¹ÀÌ½º ÁÖ»ç)
-*      - È¦Â¦ ½ºÄµ¶óÀÎÀ» ¹ø°¥¾Æ°¡¸ç ±×¸®´Â ¹æ½Ä. È¦¼ö ÁÙÀ» ±×¸®´Â °ÍÀ¸·Î ½ÃÀÛ
-*      - 60fpsÀÏ ¶§, 1/60ÃÊ¿¡ È¦¼ö, 1/60ÃÊ¿¡ Â¦¼ö ¸¦ ±×¸®´Â ½Ä
-*      - ¿¹Àü CRT ¸ğ´ÏÅÍ, TV µî¿¡¼­ »ç¿ëµÇ´ø ¹æ½Ä
-*      - ´ë¿ªÆø Àı¾à¿¡ À¯¸®ÇÏ³ª ºü¸¥ ¿òÁ÷¿¡¼­ ±ôºıÀÓÀÌ³ª ÀÜ»ê È¿°ú°¡ ³ªÅ¸³¯ ¼ö ÀÖÀ½
-*      -> DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST (Â¦¼ö ¸ÕÀú)
-*      -> DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST (È¦¼ö ¸ÕÀú)
-*    - Unspecifed (¹ÌÁöÁ¤)
-*      - ½ºÄµ¶óÀÎ ¼ø¼­¸¦ ¸í½ÃÀûÀ¸·Î ÁöÁ¤ÇÏÁö ¾ÊÀ½
-*      - ½Ã½ºÅÛ ¶Ç´Â µå¶óÀÌ¹ö°¡ ±âº» ¼³Á¤¿¡ µû¶ó ÀûÀıÈ÷ Ã³¸®
+*    - Interlaced Scan (ì¸í„°ë ˆì´ìŠ¤ ì£¼ì‚¬)
+*      - í™€ì§ ìŠ¤ìº”ë¼ì¸ì„ ë²ˆê°ˆì•„ê°€ë©° ê·¸ë¦¬ëŠ” ë°©ì‹. í™€ìˆ˜ ì¤„ì„ ê·¸ë¦¬ëŠ” ê²ƒìœ¼ë¡œ ì‹œì‘
+*      - 60fpsì¼ ë•Œ, 1/60ì´ˆì— í™€ìˆ˜, 1/60ì´ˆì— ì§ìˆ˜ ë¥¼ ê·¸ë¦¬ëŠ” ì‹
+*      - ì˜ˆì „ CRT ëª¨ë‹ˆí„°, TV ë“±ì—ì„œ ì‚¬ìš©ë˜ë˜ ë°©ì‹
+*      - ëŒ€ì—­í­ ì ˆì•½ì— ìœ ë¦¬í•˜ë‚˜ ë¹ ë¥¸ ì›€ì§ì—ì„œ ê¹œë¹¡ì„ì´ë‚˜ ì”ì‚° íš¨ê³¼ê°€ ë‚˜íƒ€ë‚  ìˆ˜ ìˆìŒ
+*      -> DXGI_MODE_SCANLINE_ORDER_UPPER_FIELD_FIRST (ì§ìˆ˜ ë¨¼ì €)
+*      -> DXGI_MODE_SCANLINE_ORDER_LOWER_FIELD_FIRST (í™€ìˆ˜ ë¨¼ì €)
+*    - Unspecifed (ë¯¸ì§€ì •)
+*      - ìŠ¤ìº”ë¼ì¸ ìˆœì„œë¥¼ ëª…ì‹œì ìœ¼ë¡œ ì§€ì •í•˜ì§€ ì•ŠìŒ
+*      - ì‹œìŠ¤í…œ ë˜ëŠ” ë“œë¼ì´ë²„ê°€ ê¸°ë³¸ ì„¤ì •ì— ë”°ë¼ ì ì ˆíˆ ì²˜ë¦¬
 *      -> DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED
 * 
-*  - Scaling: È­¸é ³» ÄÜÅÙÃ÷°¡ µğ½ºÇÃ·¹ÀÌ ÇØ»óµµ¿Í ÀÏÄ¡ÇÏÁö ¾ÊÀ» ¶§, ÇØ´ç ÄÜÅÙÃ÷ Á¶Á¤ ¹æ¹ı
-*    - Centered (Áß¾Ó ¹èÄ¡)
-*      - ¿øº» ÇØ»óµµÀÇ ÄÜÅÙÃ÷°¡ È­¸é Áß¾Ó¿¡ ¹èÄ¡, ³²´Â ºÎºĞ(µğ½ºÇÃ·¹ÀÌ »ó È­¸éÀÇ ³ª¸ÓÁö ¿µ¿ª)Àº Ã¤¿ìÁö ¾ÊÀ½
-*      - ³²´Â ºÎºĞÀº ÀÏ¹İÀûÀ¸·Î °ËÀº»öÀ¸·Î Ã¤¿öÁü
-*      - ÀÌ¹ÌÁö ¿Ö°îÀº ¾øÁö¸¸ È­¸é ÀÏºÎ ¿µ¿ªÀÌ ºö
+*  - Scaling: í™”ë©´ ë‚´ ì½˜í…ì¸ ê°€ ë””ìŠ¤í”Œë ˆì´ í•´ìƒë„ì™€ ì¼ì¹˜í•˜ì§€ ì•Šì„ ë•Œ, í•´ë‹¹ ì½˜í…ì¸  ì¡°ì • ë°©ë²•
+*    - Centered (ì¤‘ì•™ ë°°ì¹˜)
+*      - ì›ë³¸ í•´ìƒë„ì˜ ì½˜í…ì¸ ê°€ í™”ë©´ ì¤‘ì•™ì— ë°°ì¹˜, ë‚¨ëŠ” ë¶€ë¶„(ë””ìŠ¤í”Œë ˆì´ ìƒ í™”ë©´ì˜ ë‚˜ë¨¸ì§€ ì˜ì—­)ì€ ì±„ìš°ì§€ ì•ŠìŒ
+*      - ë‚¨ëŠ” ë¶€ë¶„ì€ ì¼ë°˜ì ìœ¼ë¡œ ê²€ì€ìƒ‰ìœ¼ë¡œ ì±„ì›Œì§
+*      - ì´ë¯¸ì§€ ì™œê³¡ì€ ì—†ì§€ë§Œ í™”ë©´ ì¼ë¶€ ì˜ì—­ì´ ë¹”
 *      -> DXGI_MODE_SCALING_CENTERED
-*    - Stretched (È®Àå)
-*      - ¿øº» ÇØ»óµµÀÇ ÄÁÅÙÃ÷¸¦ È­¸é ÀüÃ¼(µğ½ºÇÃ·¹ÀÌ »óÀÇ ÇØ»óµµ)¿¡ ¸ÂÃßµµ·Ï ´Ã¸®°Å³ª ÁÙÀÓ
-*      - È­¸éºñ°¡ ¸ÂÁö ¾ÊÀ¸¸é ÀÌ¹ÌÁö ¿Ö°îÀÌ ¹ß»ı
+*    - Stretched (í™•ì¥)
+*      - ì›ë³¸ í•´ìƒë„ì˜ ì»¨í…ì¸ ë¥¼ í™”ë©´ ì „ì²´(ë””ìŠ¤í”Œë ˆì´ ìƒì˜ í•´ìƒë„)ì— ë§ì¶”ë„ë¡ ëŠ˜ë¦¬ê±°ë‚˜ ì¤„ì„
+*      - í™”ë©´ë¹„ê°€ ë§ì§€ ì•Šìœ¼ë©´ ì´ë¯¸ì§€ ì™œê³¡ì´ ë°œìƒ
 *      -> DXGI_MODE_SCALING_STRETCHED
-*    - Aspect Ratio Preserved (ºñÀ² À¯Áö)
-*      - ÄÜÅÙÃ÷ÀÇ È­¸éºñ¸¦ À¯ÁöÇÏ¸é¼­ È­¸é¿¡ ¸ÂÃç Á¶Á¤(´Ã¸®°Å³ª ÁÙÀÓ)
-*      - °¡·Î ¶Ç´Â ¼¼·Î Áß ÇÑ ºÎºĞÀÇ È­¸éÀÌ ²Ë Â÷Áö ¾ÊÀ» ¼ö ÀÖÀ¸¸ç ¿ª½Ã ³²´Â ºÎºĞÀº °ËÀº»öÀ¸·Î Ã¤¿öÁú ¼ö ÀÖÀ½
-*      - ¿©±â¼­ÀÇ °ËÀº ¶ì¸¦ ·¹ÅÍ¹Ú½º ¶Ç´Â ÇÊ·¯¹Ú½º ¶ó°í ÇÔ
-*      -> DXGI ¿¡¼­ Áö¿øÇÏÁö ¾ÊÀ½ !!!
-*    - Unspecified (¹ÌÁöÁ¤)
-*      - Æ¯º°È÷ ÁöÁ¤ÇÏÁö ¾ÊÀ¸¸ç µğÆúÆ® ¼³Á¤ ¶Ç´Â ½Ã½ºÅÛ ¼³Á¤¿¡ µû¶ó ÀÚµ¿ Ã³¸®
+*    - Aspect Ratio Preserved (ë¹„ìœ¨ ìœ ì§€)
+*      - ì½˜í…ì¸ ì˜ í™”ë©´ë¹„ë¥¼ ìœ ì§€í•˜ë©´ì„œ í™”ë©´ì— ë§ì¶° ì¡°ì •(ëŠ˜ë¦¬ê±°ë‚˜ ì¤„ì„)
+*      - ê°€ë¡œ ë˜ëŠ” ì„¸ë¡œ ì¤‘ í•œ ë¶€ë¶„ì˜ í™”ë©´ì´ ê½‰ ì°¨ì§€ ì•Šì„ ìˆ˜ ìˆìœ¼ë©° ì—­ì‹œ ë‚¨ëŠ” ë¶€ë¶„ì€ ê²€ì€ìƒ‰ìœ¼ë¡œ ì±„ì›Œì§ˆ ìˆ˜ ìˆìŒ
+*      - ì—¬ê¸°ì„œì˜ ê²€ì€ ë ë¥¼ ë ˆí„°ë°•ìŠ¤ ë˜ëŠ” í•„ëŸ¬ë°•ìŠ¤ ë¼ê³  í•¨
+*      -> DXGI ì—ì„œ ì§€ì›í•˜ì§€ ì•ŠìŒ !!!
+*    - Unspecified (ë¯¸ì§€ì •)
+*      - íŠ¹ë³„íˆ ì§€ì •í•˜ì§€ ì•Šìœ¼ë©° ë””í´íŠ¸ ì„¤ì • ë˜ëŠ” ì‹œìŠ¤í…œ ì„¤ì •ì— ë”°ë¼ ìë™ ì²˜ë¦¬
 *      -> DXGI_MODE_SCALING_UNSPECIFIED
 */
 
-void SwapChain::Init( const WindowInfo& win_info, ComPtr<IDXGIFactory> dxgi, ComPtr<ID3D12CommandQueue> cmd_queue )
+void SwapChain::Init( const WindowInfo& win_info, ComPtr<ID3D12Device> device, ComPtr<IDXGIFactory> dxgi, ComPtr<ID3D12CommandQueue> cmd_queue )
 {
-	// ÀÌÀü Á¤º¸¸¦ ³¯¸², InitÀ» µÎ ¹ø ÇÑ°Ô ¾Æ´Ñ ÀÌ»ó »ç½Ç ÇÊ¿ä ¾øÀ½
-	_swap_chain.Reset();
-
-	DXGI_SWAP_CHAIN_DESC sd;
-	sd.BufferDesc.Width  = static_cast<uint32>(win_info.width);    // ¹öÆÛ ÇØ»óµµ ³Êºñ
-	sd.BufferDesc.Height = static_cast<uint32>(win_info.height);   // ¹öÆÛ ÇØ»óµµ ³ôÀÌ
-	sd.BufferDesc.RefreshRate.Numerator = 60;	// È­¸é °»½Å ºñÀ²(ÇÁ·¹ÀÓ ¼ö)
-	sd.BufferDesc.RefreshRate.Denominator = 1;	// È­¸é °»½Å ºñÀ²(ÃÊ ´ç)
-	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;	// ¹öÆÛÀÇ µğ½ºÇÃ·¹ÀÌ Çü½Ä
-	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	sd.SampleDesc.Count = 1; // ¸ÖÆ¼ »ùÇÃ¸µ Off
-	sd.SampleDesc.Quality = 0;
-	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	// ÈÄ¸é ¹öÆÛ¿¡ ·£´õ¸µÇÒ °Í
-	sd.BufferCount = SWAP_CHAIN_BUFFER_COUNT;	// Àü¸é + ÈÄ¸é ¹öÆÛ
-	sd.OutputWindow = win_info.hwnd;
-	sd.Windowed = win_info.windowed;
-	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;	// Àü¸é ÈÄ¸é ¹öÆÛ ±³Ã¼ ½Ã ÀÌÀü ÇÁ·¹ÀÓ Á¤º¸ ¹ö¸²
-	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-	dxgi->CreateSwapChain( cmd_queue.Get(), &sd, &_swap_chain );
-
-	for ( int32 i = 0; i < SWAP_CHAIN_BUFFER_COUNT; ++i )
-	{
-		_swap_chain->GetBuffer( i, IID_PPV_ARGS( &_render_targets[i] ) );
-	}
+	CreateSwapChain( win_info, dxgi, cmd_queue );
+	CreateRTV( device );
 }
 
 void SwapChain::Present()
@@ -80,4 +56,62 @@ void SwapChain::Present()
 void SwapChain::SwapIndex()
 {
 	_back_buffer_index = (_back_buffer_index + 1) % SWAP_CHAIN_BUFFER_COUNT;
+}
+
+void SwapChain::CreateSwapChain( const WindowInfo& win_info, ComPtr<IDXGIFactory> dxgi, ComPtr<ID3D12CommandQueue> cmd_queue )
+{	
+	// ì´ì „ ì •ë³´ë¥¼ ë‚ ë¦¼, Initì„ ë‘ ë²ˆ í•œê²Œ ì•„ë‹Œ ì´ìƒ ì‚¬ì‹¤ í•„ìš” ì—†ìŒ
+	_swap_chain.Reset();
+
+	DXGI_SWAP_CHAIN_DESC sd;
+	sd.BufferDesc.Width = static_cast<uint32>(win_info.width);    // ë²„í¼ í•´ìƒë„ ë„ˆë¹„
+	sd.BufferDesc.Height = static_cast<uint32>(win_info.height);   // ë²„í¼ í•´ìƒë„ ë†’ì´
+	sd.BufferDesc.RefreshRate.Numerator = 60;	// í™”ë©´ ê°±ì‹  ë¹„ìœ¨(í”„ë ˆì„ ìˆ˜)
+	sd.BufferDesc.RefreshRate.Denominator = 1;	// í™”ë©´ ê°±ì‹  ë¹„ìœ¨(ì´ˆ ë‹¹)
+	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;	// ë²„í¼ì˜ ë””ìŠ¤í”Œë ˆì´ í˜•ì‹
+	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	sd.SampleDesc.Count = 1; // ë©€í‹° ìƒ˜í”Œë§ Off
+	sd.SampleDesc.Quality = 0;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;	// í›„ë©´ ë²„í¼ì— ëœë”ë§í•  ê²ƒ
+	sd.BufferCount = SWAP_CHAIN_BUFFER_COUNT;	// ì „ë©´ + í›„ë©´ ë²„í¼
+	sd.OutputWindow = win_info.hwnd;
+	sd.Windowed = win_info.windowed;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;	// ì „ë©´ í›„ë©´ ë²„í¼ êµì²´ ì‹œ ì´ì „ í”„ë ˆì„ ì •ë³´ ë²„ë¦¼
+	sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+	dxgi->CreateSwapChain( cmd_queue.Get(), &sd, &_swap_chain );
+
+	for ( int32 i = 0; i < SWAP_CHAIN_BUFFER_COUNT; ++i )
+	{
+		_swap_chain->GetBuffer( i, IID_PPV_ARGS( &_rtv_buffer[i] ) );
+	}
+}
+
+void SwapChain::CreateRTV( ComPtr<ID3D12Device> device )
+{
+	// Descriptor (DX12) = View (~DX11)
+	// [ì„œìˆ ì í™] ìœ¼ë¡œ RTV(Render Target View) ìƒì„±
+	// DX11ì˜ RTV, DSV(Depth Stencil View)
+	// CBV(Constant Buffer View), SRV(Shader Resource View), UAV(UnorderedAccessView) ì „ë¶€
+
+	int32 rtv_heap_size = device->GetDescriptorHandleIncrementSize( D3D12_DESCRIPTOR_HEAP_TYPE_RTV );
+
+	D3D12_DESCRIPTOR_HEAP_DESC rd;
+	rd.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+	rd.NumDescriptors = SWAP_CHAIN_BUFFER_COUNT;
+	rd.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	rd.NodeMask = 0;
+
+	// ê°™ì€ ì¢…ë¥˜ì˜ ë°ì´í„°ë¼ë¦¬ ë°°ì—´ë¡œ ê´€ë¦¬
+	// RTV ëª©ë¡: [] []
+	device->CreateDescriptorHeap( &rd, IID_PPV_ARGS( &_rtv_heap ) );
+
+	D3D12_CPU_DESCRIPTOR_HANDLE rtv_heap_begin = _rtv_heap->GetCPUDescriptorHandleForHeapStart();
+
+	for ( int32 i{}; i < SWAP_CHAIN_BUFFER_COUNT; ++i )
+	{
+		_rtv_handle[i] = CD3DX12_CPU_DESCRIPTOR_HANDLE( rtv_heap_begin, i * rtv_heap_size );
+		device->CreateRenderTargetView( GetRenderTarget( i ).Get(), nullptr, _rtv_handle[i] );
+	}
 }

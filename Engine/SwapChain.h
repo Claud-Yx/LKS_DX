@@ -1,48 +1,57 @@
-#pragma once
+ï»¿#pragma once
 
-// Swap Chain (±³È¯ »ç½½)
-// - ÇöÀç °ÔÀÓ ¼¼»ó¿¡ ÀÖ´Â »óÈ²À» ¹¦»ç
-// - ¾î¶² °ø½ÄÀ¸·Î ¾î¶»°Ô °è»êÇÒÁö ´øÁ®ÁÜ
-// - GPU°¡ ¿­½ÉÈ÷ °è»ê (¿ÜÁÖ)
-// - °á°ú¹°À» ¹Ş¾Æ È­¸é¿¡ ±×¸²
+// Swap Chain (êµí™˜ ì‚¬ìŠ¬)
+// - í˜„ì¬ ê²Œì„ ì„¸ìƒì— ìˆëŠ” ìƒí™©ì„ ë¬˜ì‚¬
+// - ì–´ë–¤ ê³µì‹ìœ¼ë¡œ ì–´ë–»ê²Œ ê³„ì‚°í• ì§€ ë˜ì ¸ì¤Œ
+// - GPUê°€ ì—´ì‹¬íˆ ê³„ì‚° (ì™¸ì£¼)
+// - ê²°ê³¼ë¬¼ì„ ë°›ì•„ í™”ë©´ì— ê·¸ë¦¼
 
-// [¿ÜÁÖ °á°ú¹°]À» ¾îµğ¿¡ ¹ŞÁö?
-// - ¾î¶² Á¾ÀÌ(Buffer)¿¡ ±×·Á¼­ °Ç³»´Ş¶ó°í ºÎÅ¹ÇÔ
-// - Æ¯¼ö Á¾ÀÌ¸¦ ¸¸µê -> Ã³À½¿¡ °Ç³»ÁÜ -> °á°ú¹°À» ÇØ´ç Á¾ÀÌ¿¡ ¹ŞÀ½
-// - ¿ì¸® È­¸é¿¡ Æ¯¼ö Á¾ÀÌ(¿ÜÁÖ °á°ú¹°)¸¦ Ãâ·Â
+// [ì™¸ì£¼ ê²°ê³¼ë¬¼]ì„ ì–´ë””ì— ë°›ì§€?
+// - ì–´ë–¤ ì¢…ì´(Buffer)ì— ê·¸ë ¤ì„œ ê±´ë‚´ë‹¬ë¼ê³  ë¶€íƒí•¨
+// - íŠ¹ìˆ˜ ì¢…ì´ë¥¼ ë§Œë“¦ -> ì²˜ìŒì— ê±´ë‚´ì¤Œ -> ê²°ê³¼ë¬¼ì„ í•´ë‹¹ ì¢…ì´ì— ë°›ìŒ
+// - ìš°ë¦¬ í™”ë©´ì— íŠ¹ìˆ˜ ì¢…ì´(ì™¸ì£¼ ê²°ê³¼ë¬¼)ë¥¼ ì¶œë ¥
 
 // [?]
-// - ±×·±µ¥ È­¸é¿¡ ÇöÀç °á°ú¹°À» Ãâ·ÂÇÏ´Â ¿ÍÁß¿¡ ´ÙÀ½ È­¸é ¿ÜÁÖµµ ¸Ã°Ü¾ß ÇÔ
-// - ÇöÀç È­¸é °á°ú¹°Àº ÀÌ¹Ì È­¸é Ãâ·Â¿¡ »ç¿ëÁß
-// - Æ¯¼ö Á¾ÀÌ¸¦ 2°³ ¸¸µé¾î¼­ ÇÏ³ª´Â ÇöÀç È­¸é, ´Ù¸¥ ÇÏ³ª´Â ¿ÜÁÖ¸¦ ¸Ã±è
+// - ê·¸ëŸ°ë° í™”ë©´ì— í˜„ì¬ ê²°ê³¼ë¬¼ì„ ì¶œë ¥í•˜ëŠ” ì™€ì¤‘ì— ë‹¤ìŒ í™”ë©´ ì™¸ì£¼ë„ ë§¡ê²¨ì•¼ í•¨
+// - í˜„ì¬ í™”ë©´ ê²°ê³¼ë¬¼ì€ ì´ë¯¸ í™”ë©´ ì¶œë ¥ì— ì‚¬ìš©ì¤‘
+// - íŠ¹ìˆ˜ ì¢…ì´ë¥¼ 2ê°œ ë§Œë“¤ì–´ì„œ í•˜ë‚˜ëŠ” í˜„ì¬ í™”ë©´, ë‹¤ë¥¸ í•˜ë‚˜ëŠ” ì™¸ì£¼ë¥¼ ë§¡ê¹€
 // -> Double Buffering
 
 // - [0] [1]
-// ÇöÀç È­¸é [0] <-> GPU ÀÛ¾÷Áß [1] BackBuffer
+// í˜„ì¬ í™”ë©´ [0] <-> GPU ì‘ì—…ì¤‘ [1] BackBuffer
 
 /**
 * Note
-*  - ½±°Ô ¸»ÇØ, Double Buffing ÇÏ´Â ¾ÖÀÓ
-*  - ¸Ó½ºÅ°ÅÍµéÀÌ ½Î¿ì´Â ¹æ½ÄÀ» »ó»ó
+*  - ì‰½ê²Œ ë§í•´, Double Buffing í•˜ëŠ” ì• ì„
+*  - ë¨¸ìŠ¤í‚¤í„°ë“¤ì´ ì‹¸ìš°ëŠ” ë°©ì‹ì„ ìƒìƒ
 */
 
 class SwapChain
 {
 public:
-	void Init( const WindowInfo& win_info, ComPtr<IDXGIFactory> dxgi, ComPtr<ID3D12CommandQueue> cmd_queue );
+	void Init( const WindowInfo& win_info, ComPtr<ID3D12Device> device, ComPtr<IDXGIFactory> dxgi, ComPtr<ID3D12CommandQueue> cmd_queue );
 	void Present();
 	void SwapIndex();
 
 	inline ComPtr<IDXGISwapChain> GetSwapChain() { return _swap_chain; }
-	inline ComPtr<ID3D12Resource> GetRenderTarget( int32 index ) { return _render_targets[index]; }
+	inline ComPtr<ID3D12Resource> GetRenderTarget( int32 index ) { return _rtv_buffer[index]; }
 
-	inline uint32 GetCurrentBackBufferIndex() { return _back_buffer_index; }
-	inline ComPtr<ID3D12Resource> GetCurrentBackBufferResource() { return _render_targets[_back_buffer_index]; }
+	inline ComPtr<ID3D12Resource> GetBackRTVBuffer() { return _rtv_buffer[_back_buffer_index]; }
+
+	inline D3D12_CPU_DESCRIPTOR_HANDLE GetBackRTV() { return _rtv_handle[_back_buffer_index]; }
 
 private:
-	ComPtr<IDXGISwapChain>	_swap_chain;
-	ComPtr<ID3D12Resource>	_render_targets[SWAP_CHAIN_BUFFER_COUNT];
-	uint32					_back_buffer_index = 0;
+	void CreateSwapChain( const WindowInfo& win_info, ComPtr<IDXGIFactory> dxgi, ComPtr<ID3D12CommandQueue> cmd_queue );
+	void CreateRTV( ComPtr<ID3D12Device> device );
+
+private:
+	ComPtr<IDXGISwapChain>				_swap_chain;
+
+	ComPtr<ID3D12Resource>				_rtv_buffer[SWAP_CHAIN_BUFFER_COUNT];
+	ComPtr<ID3D12DescriptorHeap>		_rtv_heap;
+	D3D12_CPU_DESCRIPTOR_HANDLE			_rtv_handle[SWAP_CHAIN_BUFFER_COUNT];
+
+	uint32								_back_buffer_index = 0;
 
 };
 

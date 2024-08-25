@@ -1,12 +1,11 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 
 #include "CommandQueue.h"
 #include "SwapChain.h"
-#include "DescriptorHeap.h"
 
 /**
 * Note
-*  - device°¡ ÀÏ°¨À» ÁöÁ¤ÇØÁÖ°íÀÖ³×?
+*  - deviceê°€ ì¼ê°ì„ ì§€ì •í•´ì£¼ê³ ìˆë„¤?
 */
 
 CommandQueue::~CommandQueue()
@@ -14,10 +13,9 @@ CommandQueue::~CommandQueue()
 	::CloseHandle( _fence_event );
 }
 
-void CommandQueue::Init( ComPtr<ID3D12Device> device, shared_ptr<SwapChain> swap_chain, shared_ptr<DescriptorHeap> desc_heap )
+void CommandQueue::Init( ComPtr<ID3D12Device> device, shared_ptr<SwapChain> swap_chain )
 {
 	_swap_chain = swap_chain;
-	_desc_heap = desc_heap;
 
 	D3D12_COMMAND_QUEUE_DESC queue_desc{};
 	queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -25,23 +23,23 @@ void CommandQueue::Init( ComPtr<ID3D12Device> device, shared_ptr<SwapChain> swap
 
 	device->CreateCommandQueue( &queue_desc, IID_PPV_ARGS( &_cmd_queue ) );
 
-	// - D3D12_COMMAND_LIST_TYPE_DIRECT: GPU°¡ Á÷Á¢ ½ÇÇàÇÏ´Â ¸í·É ¸ñ·Ï
+	// - D3D12_COMMAND_LIST_TYPE_DIRECT: GPUê°€ ì§ì ‘ ì‹¤í–‰í•˜ëŠ” ëª…ë ¹ ëª©ë¡
 	device->CreateCommandAllocator( D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS( &_cmd_alloc ) );
 
-	// GPU°¡ ÇÏ³ªÀÎ ½Ã½ºÅÛÀº 0
+	// GPUê°€ í•˜ë‚˜ì¸ ì‹œìŠ¤í…œì€ 0
 	// DIRECT or BUNDLE
 	// Allocator
-	// ÃÊ±â »óÅÂ (±×¸®±â ¸í·ÉÀº nullptr ÁöÁ¤)
+	// ì´ˆê¸° ìƒíƒœ (ê·¸ë¦¬ê¸° ëª…ë ¹ì€ nullptr ì§€ì •)
 	device->CreateCommandList( 0, D3D12_COMMAND_LIST_TYPE_DIRECT, _cmd_alloc.Get(), nullptr, IID_PPV_ARGS( &_cmd_list ) );
 
-	// CommandList´Â Close / Open »óÅÂ°¡ Á¸Àç
-	// Open »óÅÂ: Command »ğÀÔ
-	// Close »óÅÂ: Á¦Ãâ Àü¿¡ ÇØ¾ß ÇÔ
-	// <ClaudY> file access ¿Í ºñ½ÁÇÑ µí
+	// CommandListëŠ” Close / Open ìƒíƒœê°€ ì¡´ì¬
+	// Open ìƒíƒœ: Command ì‚½ì…
+	// Close ìƒíƒœ: ì œì¶œ ì „ì— í•´ì•¼ í•¨
+	// <ClaudY> file access ì™€ ë¹„ìŠ·í•œ ë“¯
 	_cmd_list->Close();
 
 	// CreateFence
-	// - CPU¿Í GPUÀÇ µ¿±âÈ­ ¼ö´Ü
+	// - CPUì™€ GPUì˜ ë™ê¸°í™” ìˆ˜ë‹¨
 	device->CreateFence( 0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS( &_fence ) );
 	_fence_event = ::CreateEvent( nullptr, FALSE, FALSE, nullptr );
 
@@ -73,11 +71,11 @@ void CommandQueue::RenderBegin( const D3D12_VIEWPORT* viewport, const D3D12_RECT
 	_cmd_alloc->Reset();
 	_cmd_list->Reset( _cmd_alloc.Get(), nullptr );
 
-	// ÇöÀç ¹é¹öÆÛ ¸®¼Ò½º(È­¸é Ãâ·ÂÁß)¸¦ ¿ÜÁÖ °á°ú¹°¿ëÀ¸·Î ¹Ù²Ş
+	// í˜„ì¬ ë°±ë²„í¼ ë¦¬ì†ŒìŠ¤(í™”ë©´ ì¶œë ¥ì¤‘)ë¥¼ ì™¸ì£¼ ê²°ê³¼ë¬¼ìš©ìœ¼ë¡œ ë°”ê¿ˆ
 	D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		_swap_chain->GetCurrentBackBufferResource().Get(),
-		D3D12_RESOURCE_STATE_PRESENT,		// È­¸é Ãâ·Â
-		D3D12_RESOURCE_STATE_RENDER_TARGET	// ¿ÜÁÖ °á°ú¹°
+		_swap_chain->GetBackRTVBuffer().Get(),
+		D3D12_RESOURCE_STATE_PRESENT,		// í™”ë©´ ì¶œë ¥
+		D3D12_RESOURCE_STATE_RENDER_TARGET	// ì™¸ì£¼ ê²°ê³¼ë¬¼
 	);
 
 	_cmd_list->ResourceBarrier( 1, &barrier );
@@ -87,33 +85,33 @@ void CommandQueue::RenderBegin( const D3D12_VIEWPORT* viewport, const D3D12_RECT
 	_cmd_list->RSSetScissorRects( 1, rect );
 
 	// Specify the buffers we are going to render to.
-	D3D12_CPU_DESCRIPTOR_HANDLE back_buffer_view = _desc_heap->GetBackBufferView();
+	D3D12_CPU_DESCRIPTOR_HANDLE back_buffer_view = _swap_chain->GetBackRTV();
 	_cmd_list->ClearRenderTargetView( back_buffer_view, Colors::LightSteelBlue, 0, nullptr );
 	_cmd_list->OMSetRenderTargets( 1, &back_buffer_view, FALSE, nullptr );
 }
 
 void CommandQueue::RenderEnd()
 {
-	// Begin¿¡¼­ÀÇ ¼ø¼­¿Í ¹İ´ë, ´Ù½Ã swap ÇÔ
+	// Beginì—ì„œì˜ ìˆœì„œì™€ ë°˜ëŒ€, ë‹¤ì‹œ swap í•¨
 	D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		_swap_chain->GetCurrentBackBufferResource().Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,	// ¿ÜÁÖ °á°ú¹°
-		D3D12_RESOURCE_STATE_PRESENT		// È­¸é Ãâ·Â
+		_swap_chain->GetBackRTVBuffer().Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,	// ì™¸ì£¼ ê²°ê³¼ë¬¼
+		D3D12_RESOURCE_STATE_PRESENT		// í™”ë©´ ì¶œë ¥
 	);
 
 	_cmd_list->ResourceBarrier( 1, &barrier );
 	_cmd_list->Close();
 
-	// Ä¿¸Çµå ¸®½ºÆ® ¼öÇà
+	// ì»¤ë§¨ë“œ ë¦¬ìŠ¤íŠ¸ ìˆ˜í–‰
 	ID3D12CommandList* cmd_list_array[] = { _cmd_list.Get() };
 	_cmd_queue->ExecuteCommandLists( _countof( cmd_list_array ), cmd_list_array );
 
-	_swap_chain->Present();	// ½ÇÁ¦·Î ·»´õ¸µ ÇÏ´Â ÇÔ¼ö
+	_swap_chain->Present();	// ì‹¤ì œë¡œ ë Œë”ë§ í•˜ëŠ” í•¨ìˆ˜
 
 	// Wait until frame commands are complete. This waiting is inefficient and is
 	// done for simplicity. Later we will show how to organize our rendering code
 	// so we do not have to wait per frame.
-	WaitSync();	// Command QueueÀÇ ÀÏ°¨ÀÌ ³¡³¯ ¶§ ±îÁö ±â´Ù¸²
+	WaitSync();	// Command Queueì˜ ì¼ê°ì´ ëë‚  ë•Œ ê¹Œì§€ ê¸°ë‹¤ë¦¼
 
 	_swap_chain->SwapIndex();
 }

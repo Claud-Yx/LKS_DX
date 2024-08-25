@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 // Include
 #include <Windows.h>
@@ -54,13 +54,16 @@ enum
 // Predeclaration
 class Engine;
 
-// Ãâ·Â Ã¢(À©µµ¿ì)ÀÇ Á¤º¸¸¦ ´ãÀ» ±¸Á¶Ã¼
+// ì¶œë ¥ ì°½(ìœˆë„ìš°)ì˜ ì •ë³´ë¥¼ ë‹´ì„ êµ¬ì¡°ì²´
 struct WindowInfo
 {
-	HWND	hwnd;	// Ãâ·Â À©µµ¿ì
+	HWND	hwnd;	// ì¶œë ¥ ìœˆë„ìš°
 	int32	width;
 	int32	height;
 	bool	windowed;
 };
+
+#define DEVICE GEngine->GetDevice()->GetDivice();
+#define CMD_LIST GEngine->GetCommandQueue()->GetCommandList();
 
 extern unique_ptr<Engine> GEngine;

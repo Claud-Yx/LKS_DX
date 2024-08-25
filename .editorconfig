@@ -1,0 +1,5 @@
+[*.cs]  # C# 파일에 대해 적용
+charset = utf-8-bom
+
+[*.txt]  # 텍스트 파일에 대해 적용
+charset = utf-8

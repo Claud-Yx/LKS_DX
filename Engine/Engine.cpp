@@ -1,35 +1,29 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "Engine.h"
-#include "Device.h"
-#include "CommandQueue.h"
-#include "SwapChain.h"
-#include "DescriptorHeap.h"
 
 void Engine::Init( const WindowInfo& win_info )
 {
 	_window = win_info;
 	ResizeWindow( win_info.width, win_info.height );
 
-	// ±×·ÁÁú È­¸é Å©±â ¼³Á¤
+	// ê·¸ë ¤ì§ˆ í™”ë©´ í¬ê¸° ì„¤ì •
 	_viewport = { 0, 0, static_cast<FLOAT>(win_info.width), static_cast<FLOAT>(win_info.height), 0.f, 1.f };
 	_scissor_rect = CD3DX12_RECT( 0, 0, win_info.width, win_info.height );
 
 	_device = make_shared<Device>();
 	_cmd_queue = make_shared<CommandQueue>();
 	_swap_chain = make_shared<SwapChain>();
-	_desc_heap = make_shared<DescriptorHeap>();
 
 	_device->Init();
-	_cmd_queue->Init(_device->GetDevice(), _swap_chain, _desc_heap);
-	_swap_chain->Init( win_info, _device->GetDxgi(), _cmd_queue->GetCmdQueue() );
-	_desc_heap->Init( _device->GetDevice(), _swap_chain );
+	_cmd_queue->Init( _device->GetDevice(), _swap_chain );
+	_swap_chain->Init( win_info, _device->GetDevice(), _device->GetDxgi(), _cmd_queue->GetCommandQueue() );
 }
 
 void Engine::Render()
 {
 	RenderBegin();
 
-	// TODO: ³ª¸ÓÁö ¹°Ã¼¸¦ ±×¸²
+	// TODO: ë‚˜ë¨¸ì§€ ë¬¼ì²´ë¥¼ ê·¸ë¦¼
 
 	RenderEnd();
 }

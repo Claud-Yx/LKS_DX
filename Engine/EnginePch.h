@@ -63,7 +63,13 @@ struct WindowInfo
 	bool	windowed;
 };
 
-#define DEVICE GEngine->GetDevice()->GetDivice();
-#define CMD_LIST GEngine->GetCommandQueue()->GetCommandList();
+struct Vertex
+{
+	Vec3 pos;
+	Vec4 color;
+};
+
+#define DEVICE GEngine->GetDevice()->GetDevice()
+#define CMD_LIST GEngine->GetCommandQueue()->GetCommandList()
 
 extern unique_ptr<Engine> GEngine;

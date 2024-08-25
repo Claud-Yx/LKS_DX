@@ -1,3 +1,9 @@
+[*.cpp]  # C++ 소스 파일에 대해 적용
+charset = utf-8-bom
+
+[*.h]  # 헤더 파일에 대해 적용
+charset = utf-8-bom
+
 [*.cs]  # C# 파일에 대해 적용
 charset = utf-8-bom
 

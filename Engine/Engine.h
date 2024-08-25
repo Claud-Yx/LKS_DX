@@ -3,6 +3,7 @@
 #include "Device.h"
 #include "CommandQueue.h"
 #include "SwapChain.h"
+#include "RootSignature.h"
 
 class Engine
 {
@@ -14,6 +15,7 @@ public:
 	inline shared_ptr<Device> GetDevice() { return _device; }
 	inline shared_ptr<CommandQueue> GetCommandQueue() { return _cmd_queue; }
 	inline shared_ptr<SwapChain> GetSwapChain() { return _swap_chain; }
+	inline shared_ptr<RootSignature> GetRootSignature() { return _root_signature;0 }
 
 public:
 	// Command Queue에 요청 사항을 넣는 부분
@@ -33,4 +35,5 @@ private:
 	shared_ptr<Device> _device;
 	shared_ptr<CommandQueue> _cmd_queue;
 	shared_ptr<SwapChain> _swap_chain;
+	shared_ptr<RootSignature> _root_signature;
 };

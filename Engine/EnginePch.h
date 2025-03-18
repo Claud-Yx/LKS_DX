@@ -71,5 +71,6 @@ struct Vertex
 
 #define DEVICE GEngine->GetDevice()->GetDevice()
 #define CMD_LIST GEngine->GetCommandQueue()->GetCommandList()
+#define ROOT_SIGNATURE GEngine->GetRootSignature()->GetSignature()
 
 extern unique_ptr<Engine> GEngine;

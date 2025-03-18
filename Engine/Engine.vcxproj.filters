@@ -72,4 +72,7 @@
       <Filter>Resource</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resource\Shader\default.hlsli" />
+  </ItemGroup>
 </Project>

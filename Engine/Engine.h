@@ -15,7 +15,7 @@ public:
 	inline shared_ptr<Device> GetDevice() { return _device; }
 	inline shared_ptr<CommandQueue> GetCommandQueue() { return _cmd_queue; }
 	inline shared_ptr<SwapChain> GetSwapChain() { return _swap_chain; }
-	inline shared_ptr<RootSignature> GetRootSignature() { return _root_signature;0 }
+	inline shared_ptr<RootSignature> GetRootSignature() { return _root_signature; }
 
 public:
 	// Command Queue에 요청 사항을 넣는 부분
